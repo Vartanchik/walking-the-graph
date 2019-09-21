@@ -1,0 +1,33 @@
+{
+    "nodes": [
+        {
+            "name": "n1"
+        },
+        {
+            "name": "n2"
+        },
+        {
+            "name": "n3"
+        }
+    ],
+    "links": [
+        {
+            "sid": "301",
+            "source": "n1",
+            "destination": "n2",
+            "cost": 1
+        },
+        {
+            "sid": "302",
+            "source": "n2",
+            "destination": "n3",
+            "cost": 2
+        },
+        {
+            "sid": "303",
+            "source": "n3",
+            "destination": "n1",
+            "cost": 3
+        }
+    ]
+}
