@@ -6,12 +6,15 @@ import models.Link;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import models.Node;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.validation.Valid;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 /**
  * Root resource (exposed at "myresource" path)
@@ -34,10 +37,12 @@ public class MyResource {
     @GET
     @Path("/graph")
     @Produces(MediaType.TEXT_PLAIN)
-    public String getGraph() {
+    public String getGraph(@QueryParam("startNode") String startNode, @QueryParam("depth") int depth) {
 
         Graph graph = null;
-        String response = null;
+        List<String> log = new ArrayList<>();
+        String currentNodeName = startNode;
+        int steps = depth;
         ObjectMapper objectMapper = new ObjectMapper();
         File file = new File("src\\main\\java\\resources\\graph.json");
 
@@ -48,13 +53,26 @@ public class MyResource {
             e.printStackTrace();
         }
 
-        // Represent object as string for response
-        try {
-            response = objectMapper.writeValueAsString(graph);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
+        // Get list of graph's links
+        List<Link> links = graph.getLinks();
+
+        // Make steps by links
+        while (steps > 0) {
+            for (Link link : links) {
+                if (link.getSource().equals(currentNodeName)) {
+                    try {
+                        Thread.sleep(link.getCost() * 1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    currentNodeName = link.getDestination();
+                    log.add(LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")));
+                    steps--;
+                    break;
+                }
+            }
         }
 
-        return response;
+        return log.toString();
     }
 }
