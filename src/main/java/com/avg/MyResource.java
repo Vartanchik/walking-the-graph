@@ -1,12 +1,9 @@
 package com.avg;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import models.Graph;
 import models.Link;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import models.Node;
 
-import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.io.File;
@@ -15,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+
 
 /**
  * Root resource (exposed at "myresource" path)
@@ -37,14 +35,28 @@ public class MyResource {
     @GET
     @Path("/graph")
     @Produces(MediaType.TEXT_PLAIN)
-    public String getGraph(@QueryParam("startNode") String startNode, @QueryParam("depth") int depth) {
+    public void getGraph(@QueryParam("startNode") String startNode, @QueryParam("depth") int depth) {
 
-        Graph graph = null;
-        List<String> log = new ArrayList<>();
-        String currentNodeName = startNode;
-        int steps = depth;
-        ObjectMapper objectMapper = new ObjectMapper();
-        File file = new File("src\\main\\java\\resources\\graph.json");
+        new GraphAsync(startNode, depth);
+    }
+}
+
+class GraphAsync implements Runnable{
+
+    private Graph graph = null;
+    private List<String> log = new ArrayList<>();
+    private String currentNodeName;
+    private int steps;
+    private ObjectMapper objectMapper = new ObjectMapper();
+    private File file = new File("src\\main\\java\\resources\\graph.json");
+
+    public GraphAsync(String startNode, int depth){
+        currentNodeName = startNode;
+        steps = depth;
+        new Thread(this).start();
+    }
+
+    public void run(){
 
         // Read object from json file for some manipulations with it
         try {
@@ -66,13 +78,11 @@ public class MyResource {
                         e.printStackTrace();
                     }
                     currentNodeName = link.getDestination();
-                    log.add(LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")));
+                    System.out.println(LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")));
                     steps--;
                     break;
                 }
             }
         }
-
-        return log.toString();
     }
 }
