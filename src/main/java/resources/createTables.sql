@@ -1,0 +1,13 @@
+CREATE TABLE Nodes(
+    Id MEDIUMINT NOT NULL AUTO_INCREMENT,
+    Name VARCHAR(30) NOT NULL PRIMARY KEY
+);
+CREATE TABLE Links(
+    Id MEDIUMINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    Sid VARCHAR(30) NOT NULL,
+    Source VARCHAR(30) NOT NULL,
+    Destination VARCHAR(30) NOT NULL,
+    Cost MEDIUMINT NOT NULL,
+    FOREIGN KEY (Source) references Nodes(Name),
+    FOREIGN KEY (Destination) references Nodes(Name)
+);

@@ -6,6 +6,16 @@ public class Link {
     private String destination;
     private int cost;
 
+    public Link(String sid, String source, String destination, int cost) {
+        this.sid = sid;
+        this.source = source;
+        this.destination = destination;
+        this.cost = cost;
+    }
+
+    public Link() {
+    }
+
     public String getSid() {
         return sid;
     }
