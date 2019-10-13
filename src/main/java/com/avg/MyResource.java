@@ -14,13 +14,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 /**
  * Root resource (exposed at "myresource" path)
  */
 @Path("myresource")
 public class MyResource {
+
+    public static Logger log = LogManager.getLogger(MyResource.class);
 
     /**
      * Method handling HTTP GET requests. The returned object will be sent
@@ -114,7 +117,7 @@ public class MyResource {
                 if(resultSet != null){
                     resultSet.close();
                 } else {
-                    System.out.println("Reading from database error!");
+                    log.error("Reading from database error!");
                 }
             }
 
@@ -155,7 +158,7 @@ public class MyResource {
                 if(resultSet != null){
                     resultSet.close();
                 } else {
-                    System.out.println("Reading from database error!");
+                    log.error("Reading from database error!");
                 }
             }
 
@@ -231,7 +234,8 @@ class GraphAsync implements Runnable{
                         e.printStackTrace();
                     }
                     currentNodeName = link.getDestination();
-                    System.out.println(LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")));
+
+                    MyResource.log.error(LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")));
                     steps--;
                     break;
                 }
