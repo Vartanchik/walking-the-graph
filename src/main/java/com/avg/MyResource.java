@@ -18,7 +18,6 @@ import java.time.format.DateTimeFormatter;
 
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.tools.picocli.CommandLine;
 
 /**
  * Root resource (exposed at "myresource" path)
@@ -60,14 +59,7 @@ public class MyResource {
 
         List<Link> links = linkDao.getAll();
 
-        // Convert list of link objects to string and returning it as json
-        ObjectMapper objectMapper = new ObjectMapper();
-        try {
-            return objectMapper.writeValueAsString(links);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-            return null;
-        }
+        return listToString(links);
     }
 
     @GET
@@ -77,14 +69,7 @@ public class MyResource {
 
         List<Node> nodes = nodeDao.getAll();
 
-        // Convert list of link objects to string and returning it as json
-        ObjectMapper objectMapper = new ObjectMapper();
-        try {
-            return objectMapper.writeValueAsString(nodes);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-            return null;
-        }
+        return listToString(nodes);
     }
 
     @GET
@@ -94,10 +79,14 @@ public class MyResource {
 
         List<Link> links = linkDao.getByNode(id);
 
-        // Convert list of link objects to string and returning it as json
+        return listToString(links);
+    }
+
+    private String listToString(List list){
+        // Convert list of objects to string and returning it as json
         ObjectMapper objectMapper = new ObjectMapper();
         try {
-            return objectMapper.writeValueAsString(links);
+            return objectMapper.writeValueAsString(list);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
             return null;
