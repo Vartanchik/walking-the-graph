@@ -1,10 +1,15 @@
 package com.avg;
 
+import annotations.InitApp;
+import dal.link.LinkDaoImpl;
+import dal.node.NodeDaoImpl;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.URI;
 
 /**
@@ -34,7 +39,25 @@ public class Main {
      * @param args
      * @throws IOException
      */
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, ClassNotFoundException, InvocationTargetException, IllegalAccessException {
+
+        // Adding node table to DB
+        Class<?> nodeDaoClass = Class.forName("dal.node.NodeDaoImpl");
+        for (Method method : nodeDaoClass.getDeclaredMethods()){
+            if(method.isAnnotationPresent(InitApp.class)){
+                method.setAccessible(true);
+                method.invoke(new NodeDaoImpl());
+            }
+        }
+        // Adding link table to DB
+        Class<?> linkDaoClass = Class.forName("dal.link.LinkDaoImpl");
+        for (Method method : linkDaoClass.getDeclaredMethods()){
+            if(method.isAnnotationPresent(InitApp.class)){
+                method.setAccessible(true);
+                method.invoke(new LinkDaoImpl());
+            }
+        }
+
         final HttpServer server = startServer();
         System.out.println(String.format("Jersey app started with WADL available at "
                 + "%sapplication.wadl\nHit enter to stop it...", BASE_URI));

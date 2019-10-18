@@ -1,8 +1,8 @@
 package dal.link;
 
+import annotations.InitApp;
 import com.avg.MyResource;
 import models.Link;
-import models.Node;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -131,6 +131,29 @@ public class LinkDaoImpl implements LinkDao {
         }
 
         return links;
+    }
+
+    @InitApp
+    private void createLinkTable() {
+
+        String createTable = "CREATE TABLE Links(" +
+                "Id MEDIUMINT NOT NULL AUTO_INCREMENT PRIMARY KEY," +
+                "Sid VARCHAR(30) NOT NULL," +
+                "Source VARCHAR(30) NOT NULL," +
+                "Destination VARCHAR(30) NOT NULL," +
+                "Cost MEDIUMINT NOT NULL," +
+                "FOREIGN KEY (Source) references Nodes(Name)," +
+                "FOREIGN KEY (Destination) references Nodes(Name))";
+
+        // Connect to database
+        try (Connection connection = getConnection()) {
+
+            PreparedStatement preparedStatement = connection.prepareStatement(createTable);
+            preparedStatement.execute();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     // Common method of getting connection to database
