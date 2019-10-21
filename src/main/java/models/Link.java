@@ -1,10 +1,17 @@
 package models;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 public class Link {
     private String sid;
     private String source;
     private String destination;
     private int cost;
+    public static Logger log = LogManager.getLogger(Link.class);
 
     public Link(String sid, String source, String destination, int cost) {
         this.sid = sid;
@@ -47,4 +54,19 @@ public class Link {
     public void setCost(int cost) {
         this.cost = cost;
     }
+
+    public void makeStep(Node node) {
+        if(!node.getName().equals(source)){
+            return;
+        }
+
+        try {
+            Thread.sleep(cost * 1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        log.error(LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")));
+    }
+
 }

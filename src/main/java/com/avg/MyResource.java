@@ -13,11 +13,11 @@ import models.Node;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.util.List;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import rx.Observable;
 
 /**
  * Root resource (exposed at "myresource" path)
@@ -98,6 +98,8 @@ class GraphAsync implements Runnable {
 
     private String currentNodeName;
     private int steps;
+    private List<Link> links;
+    private List<Node> nodes;
 
     public GraphAsync(String startNode, int depth) {
         currentNodeName = startNode;
@@ -105,13 +107,42 @@ class GraphAsync implements Runnable {
         new Thread(this).start();
     }
 
+    public Observable<Node> move(List<Node> nodes){
+        return Observable.just(nodes)
+                         .map(n -> findNodeByName(n, currentNodeName))
+                         .doOnNext(n -> findLinkByNode(links, n).makeStep(n))
+                         .doOnNext(n -> currentNodeName = findLinkByNode(links, n).getDestination())
+                         .repeat(steps);
+    }
+
+    private Link findLinkByNode(List<Link> links, Node node){
+        return links.parallelStream()
+                    .filter(link -> link.getSource().equals(node.getName()))
+                    .collect(Collectors.toList())
+                    .get(0);
+    }
+
+    private Node findNodeByName(List<Node> nodes, String nodeName){
+        return nodes.parallelStream()
+                    .filter(node -> node.getName().equals(nodeName))
+                    .collect(Collectors.toList())
+                    .get(0);
+    }
+
     public void run() {
 
         // Get list of graph's links
-        List<Link> links = MyResource.linkDao.getAll();
+        links = MyResource.linkDao.getAll();
 
-        // Make steps by links
-        while (steps > 0) {
+
+        // Get list of graph's nodes
+        nodes = MyResource.nodeDao.getAll();
+
+        // Make steps by links (RxJava)
+        move(nodes).subscribe();
+
+        // Make steps by links (while and forEach)
+        /*while (steps > 0) {
             links.parallelStream().forEach(link -> {
                 if (link.getSource().equals(currentNodeName)) {
                     try {
@@ -125,6 +156,6 @@ class GraphAsync implements Runnable {
                     steps--;
                 }
             });
-        }
+        }*/
     }
 }
