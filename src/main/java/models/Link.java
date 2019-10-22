@@ -66,7 +66,7 @@ public class Link {
             e.printStackTrace();
         }
 
-        log.error(LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")));
+        log.info(LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")));
     }
 
 }

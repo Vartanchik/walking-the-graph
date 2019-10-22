@@ -152,7 +152,7 @@ public class LinkDaoImpl implements LinkDao {
             preparedStatement.execute();
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.info("Link table already exist in database!");
         }
     }
 

@@ -84,7 +84,7 @@ public class NodeDaoImpl implements NodeDao {
             preparedStatement.execute();
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.info("Node table already exist in database!");
         }
     }
 
