@@ -5,6 +5,8 @@ import dal.link.LinkDao;
 import dal.link.LinkDaoImpl;
 import dal.node.NodeDao;
 import dal.node.NodeDaoImpl;
+import groovy.lang.Binding;
+import groovy.lang.GroovyShell;
 import models.Graph;
 import models.Link;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -13,10 +15,13 @@ import models.Node;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.codehaus.groovy.control.CompilerConfiguration;
+import resources.GroovyScript;
 import rx.Observable;
 
 /**
@@ -101,7 +106,8 @@ class GraphAsync implements Runnable {
     private List<Link> links;
     private List<Node> nodes;
 
-    public GraphAsync(String startNode, int depth) {
+    public GraphAsync(String startNode, int depth){
+
         currentNodeName = startNode;
         steps = depth;
         new Thread(this).start();
@@ -134,12 +140,33 @@ class GraphAsync implements Runnable {
         // Get list of graph's links
         links = MyResource.linkDao.getAll();
 
+        // Set weight field by random value
+        links.parallelStream().map(link -> { link.setWeight(new Random().nextInt(110-95+1) + 95); return link; })
+                              .collect(Collectors.toList());
 
         // Get list of graph's nodes
         nodes = MyResource.nodeDao.getAll();
 
+        // Setup connection with groovy script
+        CompilerConfiguration config = new CompilerConfiguration();
+        config.setScriptBaseClass(GroovyScript.class.getName());
+        Binding binding = new Binding();
+        binding.setProperty("links", links);
+        binding.setProperty("nodes", nodes);
+        binding.setProperty("currentNodeName", currentNodeName);
+        binding.setProperty("steps", steps);
+        binding.setProperty("weight", 105); // here I don't know how to pass this value to groovy script
+        binding.setVariable("hopcount", steps);
+        GroovyShell shell = new GroovyShell(binding, config);
+
+        // Make steps by links (groovy script)
+        shell.evaluate("goTo links where weight >= 105 until hopcount < 10");
+        //shell.evaluate("goTo2 links where weight >= 105");
+        //shell.evaluate("goTo3 links until hopcount < 10");
+        //shell.evaluate("goTo4 links");
+
         // Make steps by links (RxJava)
-        move(nodes).subscribe();
+        //move(nodes).subscribe();
 
         // Make steps by links (while and forEach)
         /*while (steps > 0) {

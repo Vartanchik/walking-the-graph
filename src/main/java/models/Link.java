@@ -10,7 +10,9 @@ public class Link {
     private String sid;
     private String source;
     private String destination;
+    private int weight;
     private int cost;
+
     public static Logger log = LogManager.getLogger(Link.class);
 
     public Link(String sid, String source, String destination, int cost) {
@@ -53,6 +55,14 @@ public class Link {
 
     public void setCost(int cost) {
         this.cost = cost;
+    }
+
+    public int getWeight() {
+        return weight;
+    }
+
+    public void setWeight(int weight) {
+        this.weight = weight;
     }
 
     public void makeStep(Node node) {
