@@ -105,6 +105,8 @@ class GraphAsync implements Runnable {
     private int steps;
     private List<Link> links;
     private List<Node> nodes;
+    private Binding binding;
+    private GroovyShell shell;
 
     public GraphAsync(String startNode, int depth){
 
@@ -116,7 +118,14 @@ class GraphAsync implements Runnable {
     public Observable<Node> move(List<Node> nodes){
         return Observable.just(nodes)
                          .map(n -> findNodeByName(n, currentNodeName))
-                         .doOnNext(n -> findLinkByNode(links, n).makeStep(n))
+                         .doOnNext(n -> {
+                             binding.setProperty("node", n);
+                             binding.setProperty("weight", 105); // here I don't know how to pass this value to groovy script
+                             shell.evaluate("goTo links where weight >= 105 until hopcount < 10");
+                             //shell.evaluate("goTo2 links where weight >= 105");
+                             //shell.evaluate("goTo3 links until hopcount < 10");
+                             //shell.evaluate("goTo4 links");
+                         })
                          .doOnNext(n -> currentNodeName = findLinkByNode(links, n).getDestination())
                          .repeat(steps);
     }
@@ -150,39 +159,12 @@ class GraphAsync implements Runnable {
         // Setup connection with groovy script
         CompilerConfiguration config = new CompilerConfiguration();
         config.setScriptBaseClass(GroovyScript.class.getName());
-        Binding binding = new Binding();
-        binding.setProperty("links", links);
-        binding.setProperty("nodes", nodes);
-        binding.setProperty("currentNodeName", currentNodeName);
-        binding.setProperty("steps", steps);
-        binding.setProperty("weight", 105); // here I don't know how to pass this value to groovy script
+        binding = new Binding();
+        binding.setVariable("links", links);
         binding.setVariable("hopcount", steps);
-        GroovyShell shell = new GroovyShell(binding, config);
-
-        // Make steps by links (groovy script)
-        shell.evaluate("goTo links where weight >= 105 until hopcount < 10");
-        //shell.evaluate("goTo2 links where weight >= 105");
-        //shell.evaluate("goTo3 links until hopcount < 10");
-        //shell.evaluate("goTo4 links");
+        shell = new GroovyShell(binding, config);
 
         // Make steps by links (RxJava)
-        //move(nodes).subscribe();
-
-        // Make steps by links (while and forEach)
-        /*while (steps > 0) {
-            links.parallelStream().forEach(link -> {
-                if (link.getSource().equals(currentNodeName)) {
-                    try {
-                        Thread.sleep(link.getCost() * 1000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    currentNodeName = link.getDestination();
-
-                    MyResource.log.error(LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")));
-                    steps--;
-                }
-            });
-        }*/
+        move(nodes).subscribe();
     }
 }
