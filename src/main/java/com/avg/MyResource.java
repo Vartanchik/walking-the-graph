@@ -120,10 +120,9 @@ class GraphAsync implements Runnable {
                          .map(n -> findNodeByName(n, currentNodeName))
                          .doOnNext(n -> {
                              binding.setProperty("node", n);
-                             binding.setProperty("weight", 105); // here I don't know how to pass this value to groovy script
-                             shell.evaluate("goTo links where weight >= 105 until hopcount < 10");
-                             //shell.evaluate("goTo2 links where weight >= 105");
-                             //shell.evaluate("goTo3 links until hopcount < 10");
+                             shell.evaluate("goTo links where weight greaterOrEqual 105 until hopcount less 10");
+                             //shell.evaluate("goTo2 links where weight greaterOrEqual 105");
+                             //shell.evaluate("goTo3 links until hopcount less 10");
                              //shell.evaluate("goTo4 links");
                          })
                          .doOnNext(n -> currentNodeName = findLinkByNode(links, n).getDestination())
@@ -162,6 +161,7 @@ class GraphAsync implements Runnable {
         binding = new Binding();
         binding.setVariable("links", links);
         binding.setVariable("hopcount", steps);
+        binding.setVariable("weight", 0);
         shell = new GroovyShell(binding, config);
 
         // Make steps by links (RxJava)

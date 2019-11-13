@@ -3,14 +3,29 @@ package resources
 import models.Link
 import models.Node
 
-int weight
 Node node
 
 def goTo(List<Link> links) {
-    [where: { weightCondition ->
-        [until: { hopcountCondition ->
+    [where: { weight ->
+        [greaterOrEqual: { weightValue ->
+            [until: { hopcount ->
+                [less: { hopcountValue ->
+                    links.each { l ->
+                        if (node.getName() == l.getSource() && l.getWeight() >= weightValue && hopcount < hopcountValue) {
+                            l.makeStep(node)
+                        }
+                    }
+                }]
+            }]
+        }]
+    }]
+};
+
+def goTo2(List<Link> links) {
+    [where: { weight ->
+        [greaterOrEqual: { weightValue ->
             links.each { l ->
-                if (node.getName() == l.getSource() && l.getWeight() >= weight && hopcountCondition) {
+                if (node.getName() == l.getSource() && l.getWeight() >= weightValue) {
                     l.makeStep(node)
                 }
             }
@@ -18,23 +33,15 @@ def goTo(List<Link> links) {
     }]
 };
 
-def goTo2(List<Link> links) {
-    [where: { weightCondition ->
-        links.each { l ->
-            if (node.getName() == l.getSource() && l.getWeight() >= weight) {
-                l.makeStep(node)
-            }
-        }
-    }]
-};
-
 def goTo3(List<Link> links) {
-    [until: { hopcountCondition ->
-        links.each { l ->
-            if (node.getName() == l.getSource() && hopcountCondition) {
-                l.makeStep(node)
+    [until: { hopcount ->
+        [less: { hopcountValue ->
+            links.each { l ->
+                if (node.getName() == l.getSource() && hopcount < hopcountValue) {
+                    l.makeStep(node)
+                }
             }
-        }
+        }]
     }]
 };
 
